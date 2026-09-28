@@ -1,0 +1,19 @@
+{
+  "name": "gsam-api",
+  "version": "1.0.0",
+  "description": "API REST da plataforma GSAM Maricá",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "sequelize": "^6.37.8",
+    "sqlite3": "^6.0.1"
+  },
+  "keywords": []
+}
