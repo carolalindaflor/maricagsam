@@ -21,7 +21,7 @@ import {
 // ========================================
 function getImagem(url?: string) {
   if (!url) {
-    return "/assets/default-avatar.png";
+    return "/maricagsam/assets/default-avatar.png";
   }
 
   if (url.startsWith("http")) {
@@ -29,10 +29,10 @@ function getImagem(url?: string) {
   }
 
   if (url.startsWith("/")) {
-    return url;
+    return `/maricagsam${url}`;
   }
 
-  return `/assets/${url}`;
+  return `/maricagsam/assets/${url}`;
 }
 
 // ========================================
@@ -246,7 +246,7 @@ function App() {
         <div className="container header-content">
           <div className="logo-area">
             <img
-              src="/assets/logo.jpeg"
+              src="/maricagsam/assets/logo.jpeg"
               alt="GSAM Maricá"
               className="logo"
             />
@@ -304,7 +304,7 @@ function App() {
               </div>
             </div>
             <div className="hero-image">
-              <img src="/assets/Marica.jpeg" alt="Maricá" />
+              <img src="/maricagsam/assets/Marica.jpeg" alt="Maricá" />
             </div>
           </div>
         </section>

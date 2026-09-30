@@ -11,7 +11,7 @@ export default function Loading() {
       "div",
       { className: "loading-content" },
       React.createElement("img", {
-        src: "/assets/logo.jpeg",
+        src: "/maricagsam/assets/logo.jpeg",
         alt: "GSAM Maricá",
         className: "loading-logo",
       }),
