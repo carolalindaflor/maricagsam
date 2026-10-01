@@ -1,9 +1,7 @@
-import { Sequelize } from "sequelize";
+import sequelize from "../database.js";
 
-const sequelize = new Sequelize({
-  dialect: "sqlite",
-  storage: "./database.sqlite",
-  logging: false,
-});
+import "./Empreendedor.js";
+import "./Produto.js";
+import "./Usuario.js";
 
 export default sequelize;

@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000";
+const API_URL = "https://gsam-api.onrender.com";
 
 export interface Empreendedor {
   id: number;
