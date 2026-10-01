@@ -1,4 +1,4 @@
-import express from "express";
+﻿import express from "express";
 import cors from "cors";
 import sequelize from "./models/index.js";
 
@@ -7,7 +7,8 @@ import produtoRoutes from "./routes/produtoRoutes.js";
 import usuarioRoutes from "./routes/usuarioRoutes.js";
 
 const app = express();
-const port = 3000;
+
+const port = process.env.PORT || 3000;
 
 // Middlewares
 app.use(cors());
@@ -32,21 +33,20 @@ sequelize
   .then(() => {
     console.log("💾 Banco de dados SQLite sincronizado com sucesso!");
 
-    // Inicia o servidor na porta configurada
-    const servidor = app.listen(port, "127.0.0.1", () => {
-      console.log(`🚀 Servidor rodando em http://127.0.0.1:${port}`);
+    const servidor = app.listen(port, "0.0.0.0", () => {
+      console.log(`🚀 Servidor rodando na porta ${port}`);
     });
 
-    // Escuta erros específicos do servidor (ex: porta já em uso)
     servidor.on("error", (error) => {
       console.error("❌ ERRO AO ABRIR A PORTA:", error.message);
     });
 
-    // Confirma que o servidor está realmente escutando a porta
     servidor.on("listening", () => {
-      console.log(`✅ EVENTO LISTENING: porta ${port} realmente aberta e pronta para receber requisições.`);
+      console.log(
+        `✅ EVENTO LISTENING: porta ${port} realmente aberta e pronta para receber requisições.`
+      );
     });
   })
   .catch((error) => {
-    console.error("❌ Erro ao conectar com o banco de dados:", error);
+    console.error("❌ Erro ao sincronizar banco de dados:", error);
   });
