@@ -1,10 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-
-// CSS
-// @ts-expect-error CSS imports are handled by the bundler.
-import "./App.css";
-
-import Loading from "./components/loading";
+import Loading from "./components/loading.tsx";
 import AdicionarProduto from "./components/AdicionarProduto";
 import CadastroUsuario from "./components/CadastroUsuario";
 import LoginUsuario from "./components/LoginUsuario";
@@ -20,38 +15,40 @@ import {
 // FUNÇÃO PARA CORRIGIR CAMINHO DAS IMAGENS
 // ========================================
 function getImagem(url?: string) {
-  if (!url) {
-    return "/maricagsam/assets/default-avatar.png";
-  }
+  if (!url) return "/maricagsam/assets/gsam.jpeg";
+  if (url.startsWith("http")) return url;
 
-  if (url.startsWith("http")) {
-    return url;
-  }
+  const caminho = url.replace(/^\/+/, "");
+  const caminhoFinal = caminho.startsWith("maricagsam/")
+    ? caminho.slice("maricagsam/".length)
+    : caminho;
 
-  if (url.startsWith("/")) {
-    return `/maricagsam${url}`;
-  }
-
-  return `/maricagsam/assets/${url}`;
+  return `/maricagsam/${caminhoFinal}`;
 }
 
 // ========================================
 // IMAGEM DOS PRODUTOS
 // ========================================
-function getImagemProduto(url?: string) {
-  if (!url) {
-    return "/assets/default-product.png";
+function getImagemProduto(url?: string, produtoId?: number): string {
+  const base = "/maricagsam/assets/";
+
+  const fotosPorProduto: Record<number, string> = {
+    1: "sabonete.jpeg",
+    2: "escalda pès.jpeg",
+    3: "Terapeuticos.jpeg",
+    4: "Taro.jpeg",
+    5: "Aula canto-piano.jpeg",
+    6: "Aula canto-piano.jpeg",
+  };
+
+  if (url?.startsWith("http")) return url;
+
+  if (url?.trim()) {
+    const nomeArquivo = url.split("/").pop();
+    if (nomeArquivo) return `${base}${nomeArquivo}`;
   }
 
-  if (url.startsWith("http")) {
-    return url;
-  }
-
-  if (url.startsWith("/")) {
-    return url;
-  }
-
-  return `/assets/${url}`;
+  return `${base}${fotosPorProduto[produtoId ?? 0] ?? "gsam.jpeg"}`;
 }
 
 // ========================================
@@ -61,19 +58,12 @@ function App() {
   // ========================================
   // ESTADOS
   // ========================================
-
   const [loadingInicial, setLoadingInicial] = useState(true);
 
-  const [empreendedores, setEmpreendedores] = useState<
-    Empreendedor[]
-  >([]);
-
+  const [empreendedores, setEmpreendedores] = useState<Empreendedor[]>([]);
   const [produtos, setProdutos] = useState<Produto[]>([]);
-
   const [loadingApi, setLoadingApi] = useState(true);
-
   const [erro, setErro] = useState("");
-
   const [contatoAberto, setContatoAberto] = useState(false);
 
   const [empreendedoraSelecionada, setEmpreendedoraSelecionada] =
@@ -82,15 +72,12 @@ function App() {
   // ========================================
   // USUÁRIO LOGADO
   // ========================================
-
   const [usuarioLogado, setUsuarioLogado] = useState<{
     nome: string;
   } | null>(() => {
     const usuarioSalvo = localStorage.getItem("usuarioGSAM");
 
-    if (!usuarioSalvo) {
-      return null;
-    }
+    if (!usuarioSalvo) return null;
 
     try {
       return JSON.parse(usuarioSalvo) as { nome: string };
@@ -104,8 +91,7 @@ function App() {
   // ========================================
   useEffect(() => {
     function atualizarUsuario() {
-      const usuarioSalvo =
-        localStorage.getItem("usuarioGSAM");
+      const usuarioSalvo = localStorage.getItem("usuarioGSAM");
 
       if (!usuarioSalvo) {
         setUsuarioLogado(null);
@@ -113,31 +99,22 @@ function App() {
       }
 
       try {
-        setUsuarioLogado(
-          JSON.parse(usuarioSalvo)
-        );
+        setUsuarioLogado(JSON.parse(usuarioSalvo) as { nome: string });
       } catch {
         setUsuarioLogado(null);
       }
     }
 
-    window.addEventListener(
-      "usuarioGSAMLogado",
-      atualizarUsuario
-    );
+    window.addEventListener("usuarioGSAMLogado", atualizarUsuario);
 
     return () => {
-      window.removeEventListener(
-        "usuarioGSAMLogado",
-        atualizarUsuario
-      );
+      window.removeEventListener("usuarioGSAMLogado", atualizarUsuario);
     };
   }, []);
 
   // ========================================
   // SAIR DO GSAM
   // ========================================
-
   function sairDoGSAM() {
     localStorage.removeItem("usuarioGSAM");
     setUsuarioLogado(null);
@@ -146,7 +123,6 @@ function App() {
   // ========================================
   // LOADING INICIAL
   // ========================================
-
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoadingInicial(false);
@@ -158,29 +134,21 @@ function App() {
   // ========================================
   // BUSCAR EMPREENDEDORES E PRODUTOS
   // ========================================
-
   const carregarDados = useCallback(async () => {
     try {
       setLoadingApi(true);
       setErro("");
 
-      const [dadosEmpreendedores, dadosProdutos] =
-        await Promise.all([
-          getEmpreendedores(),
-          getProdutos(),
-        ]);
+      const [dadosEmpreendedores, dadosProdutos] = await Promise.all([
+        getEmpreendedores(),
+        getProdutos(),
+      ]);
 
       setEmpreendedores(
-        Array.isArray(dadosEmpreendedores)
-          ? dadosEmpreendedores
-          : []
+        Array.isArray(dadosEmpreendedores) ? dadosEmpreendedores : []
       );
 
-      setProdutos(
-        Array.isArray(dadosProdutos)
-          ? dadosProdutos
-          : []
-      );
+      setProdutos(Array.isArray(dadosProdutos) ? dadosProdutos : []);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
 
@@ -195,7 +163,6 @@ function App() {
   // ========================================
   // CARREGAR API
   // ========================================
-
   useEffect(() => {
     carregarDados();
   }, [carregarDados]);
@@ -203,30 +170,35 @@ function App() {
   // ========================================
   // SELECIONAR EMPREENDEDORA
   // ========================================
-
-  function selecionarEmpreendedora(
-    empreendedor: Empreendedor
-  ) {
+  function selecionarEmpreendedora(empreendedor: Empreendedor) {
     setEmpreendedoraSelecionada(empreendedor);
   }
 
   // ========================================
   // PRODUTOS DA EMPREENDEDORA
   // ========================================
+  const produtosDaEmpreendedora = empreendedoraSelecionada
+    ? produtos.filter((dadosProduto) => {
+        const idEmpreendedor =
+          dadosProduto.empreendedorId != null &&
+          typeof dadosProduto.empreendedorId === "object"
+            ? (
+                dadosProduto.empreendedorId as {
+                  id: number | string;
+                }
+              ).id
+            : dadosProduto.empreendedorId;
 
-  const produtosDaEmpreendedora =
-    empreendedoraSelecionada
-      ? produtos.filter(
-          (produto) =>
-            Number(produto.empreendedorId) ===
-            Number(empreendedoraSelecionada.id)
-        )
-      : [];
+        return (
+          idEmpreendedor != null &&
+          String(idEmpreendedor) === String(empreendedoraSelecionada.id)
+        );
+      })
+    : [];
 
   // ========================================
   // LOADING INICIAL
   // ========================================
-
   if (loadingInicial) {
     return <Loading />;
   }
@@ -234,14 +206,9 @@ function App() {
   // ========================================
   // RETURN
   // ========================================
-
   return (
     <div className="gsam-app">
-
-      {/* ========================================
-          HEADER
-      ======================================== */}
-
+      {/* HEADER */}
       <header className="header">
         <div className="container header-content">
           <div className="logo-area">
@@ -249,7 +216,12 @@ function App() {
               src="/maricagsam/assets/logo.jpeg"
               alt="GSAM Maricá"
               className="logo"
+              onError={(event) => {
+                event.currentTarget.onerror = null;
+                event.currentTarget.src = "/maricagsam/assets/gsam.jpeg";
+              }}
             />
+
             <div>
               <strong>GSAM</strong>
               <span>Maricá</span>
@@ -277,13 +249,12 @@ function App() {
       </header>
 
       <main>
-        {/* ========================================
-            HERO
-        ======================================== */}
+        {/* HERO */}
         <section id="inicio" className="hero">
           <div className="container hero-content">
             <div className="hero-text">
               <span className="hero-tag">GSAM • MARICÁ</span>
+
               <h1>
                 Acolher.
                 <br />
@@ -291,73 +262,91 @@ function App() {
                 <br />
                 <strong>Conectar.</strong>
               </h1>
+
               <p>
-                Uma plataforma para valorizar pessoas migrantes, fortalecer seus negócios e conectar a comunidade empreendedora de Maricá.
+                Uma plataforma para valorizar pessoas migrantes, fortalecer
+                seus negócios e conectar a comunidade empreendedora de Maricá.
               </p>
+
               <div className="hero-actions">
                 <a href="#sobre" className="primary-button">
                   Conheça o GSAM
                 </a>
+
                 <a href="#empreendedores" className="secondary-button">
                   Ver empreendedores
                 </a>
               </div>
             </div>
+
             <div className="hero-image">
-              <img src="/maricagsam/assets/Marica.jpeg" alt="Maricá" />
+              <img
+                src="/maricagsam/assets/Marica.jpeg"
+                alt="Maricá"
+                onError={(event) => {
+                  event.currentTarget.onerror = null;
+                  event.currentTarget.src = "/maricagsam/assets/gsam.jpeg";
+                }}
+              />
             </div>
           </div>
         </section>
 
-        {/* ========================================
-            SOBRE
-        ======================================== */}
+        {/* SOBRE */}
         <section id="sobre" className="section">
           <div className="container">
             <span className="section-tag">QUEM SOMOS</span>
+
             <h2>Uma comunidade que acolhe e transforma</h2>
+
             <p className="section-description">
-              O GSAM Maricá promove acolhimento, integração, diversidade e oportunidades para pessoas migrantes e refugiadas, fortalecendo seus talentos, negócios e conexões com a comunidade local.
+              O GSAM Maricá promove acolhimento, integração, diversidade e
+              oportunidades para pessoas migrantes e refugiadas, fortalecendo
+              seus talentos, negócios e conexões com a comunidade local.
             </p>
 
             <div className="sobre-cards">
-  <div className="sobre-card">
-    <span className="sobre-icon">🤝</span>
-    <h3>Acolhimento</h3>
-    <p>
-      Criar espaços de integração e pertencimento para pessoas migrantes e refugiadas.
-    </p>
-  </div>
+              <div className="sobre-card">
+                <span className="sobre-icon">🤝</span>
+                <h3>Acolhimento</h3>
+                <p>
+                  Criar espaços de integração e pertencimento para pessoas
+                  migrantes e refugiadas.
+                </p>
+              </div>
 
-  <div className="sobre-card">
-    <span className="sobre-icon">🌎</span>
-    <h3>Diversidade</h3>
-    <p>
-      Valorizar diferentes culturas, histórias, talentos e experiências.
-    </p>
-  </div>
+              <div className="sobre-card">
+                <span className="sobre-icon">🌎</span>
+                <h3>Diversidade</h3>
+                <p>
+                  Valorizar diferentes culturas, histórias, talentos e
+                  experiências.
+                </p>
+              </div>
 
-  <div className="sobre-card">
-    <span className="sobre-icon">🚀</span>
-    <h3>Oportunidades</h3>
-    <p>
-      Conectar pessoas, negócios e novas possibilidades de crescimento.
-    </p>
-  </div>
-</div>
+              <div className="sobre-card">
+                <span className="sobre-icon">🚀</span>
+                <h3>Oportunidades</h3>
+                <p>
+                  Conectar pessoas, negócios e novas possibilidades de
+                  crescimento.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* ========================================
-            EMPREENDEDORES
-        ======================================== */}
+        {/* EMPREENDEDORES */}
         <section id="empreendedores" className="section section-light">
           <div className="container">
             <span className="section-tag">EMPREENDEDORISMO</span>
+
             <h2>Conheça nossos empreendedores</h2>
+
             <p className="section-description">
-              Conheça as histórias, talentos e negócios de pessoas migrantes que empreendem em Maricá.
-               Clique em uma empreendedora para conhecer seus produtos e serviços
+              Conheça as histórias, talentos e negócios de pessoas migrantes
+              que empreendem em Maricá. Clique em uma empreendedora para
+              conhecer seus produtos e serviços.
             </p>
 
             {loadingApi && (
@@ -374,6 +363,22 @@ function App() {
                 <div>
                   <h3>Não foi possível carregar</h3>
                   <p>{erro}</p>
+                  <button
+                    type="button"
+                    className="primary-button"
+                    onClick={carregarDados}
+                  >
+                    Tentar novamente
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {!loadingApi && !erro && empreendedores.length === 0 && (
+              <div className="entrepreneur-card">
+                <div>
+                  <h3>Nenhum empreendedor encontrado</h3>
+                  <p>Não há empreendedores disponíveis na API neste momento.</p>
                 </div>
               </div>
             )}
@@ -389,6 +394,7 @@ function App() {
                     tabIndex={0}
                     onKeyDown={(event) => {
                       if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
                         selecionarEmpreendedora(empreendedor);
                       }
                     }}
@@ -398,17 +404,23 @@ function App() {
                         src={getImagem(empreendedor.foto)}
                         alt={empreendedor.nome}
                         onError={(event) => {
-                          event.currentTarget.src = "/assets/default-avatar.png";
+                          event.currentTarget.onerror = null;
+                          event.currentTarget.src =
+                            "/maricagsam/assets/gsam.jpeg";
                         }}
                       />
                     </div>
 
                     <div className="card-content">
                       <h3>{empreendedor.nome}</h3>
-                      <p>{empreendedor.nacionalidade === "Venezuelana" && "🇻🇪 "}
-                         {empreendedor.nacionalidade === "Argentina" && "🇦🇷 "}
-                         {empreendedor.nacionalidade === "Cubana" && "🇨🇺 "}
-                         {empreendedor.nacionalidade}</p>
+
+                      <p>
+                        {empreendedor.nacionalidade === "Venezuelana" && "🇻🇪 "}
+                        {empreendedor.nacionalidade === "Argentina" && "🇦🇷 "}
+                        {empreendedor.nacionalidade === "Cubana" && "🇨🇺 "}
+                        {empreendedor.nacionalidade}
+                      </p>
+
                       <span>{empreendedor.descricao}</span>
 
                       {empreendedor.telefone && (
@@ -431,16 +443,17 @@ function App() {
               </div>
             )}
 
-            {/* ========================================
-                PRODUTOS
-            ======================================== */}
+            {/* PRODUTOS DA EMPREENDEDORA SELECIONADA */}
             {empreendedoraSelecionada && (
               <section className="products-section">
                 <div className="products-header">
                   <div>
-                    <span className="section-tag">PRODUTOS</span>
-                    <h2>Produtos de {empreendedoraSelecionada.nome}</h2>
+                    <span className="section-tag">PRODUTOS E SERVIÇOS</span>
+                    <h2>
+                      Produtos de {empreendedoraSelecionada.nome}
+                    </h2>
                   </div>
+
                   <button
                     type="button"
                     className="secondary-button"
@@ -449,15 +462,23 @@ function App() {
                     Fechar
                   </button>
                 </div>
-                    <div className="aviso-produtos">
-                  <strong>Importante:</strong> O GSAM Maricá atua como uma plataforma de divulgação e conexão.
-                  A negociação, o pagamento, a entrega e a prestação dos produtos ou serviços são de responsabilidade exclusiva do empreendedor e do cliente.
-                 </div>
+
+                <div className="aviso-produtos">
+                  <strong>Importante:</strong> O GSAM Maricá atua como uma
+                  plataforma de divulgação e conexão. A negociação, o
+                  pagamento, a entrega e a prestação dos produtos ou serviços
+                  são de responsabilidade exclusiva do empreendedor e do
+                  cliente.
+                </div>
+
                 {produtosDaEmpreendedora.length === 0 ? (
                   <div className="entrepreneur-card">
                     <div>
                       <h3>Nenhum produto cadastrado</h3>
-                      <p>Esta empreendedora ainda não possui produtos cadastrados.</p>
+                      <p>
+                        Esta empreendedora ainda não possui produtos
+                        cadastrados.
+                      </p>
                     </div>
                   </div>
                 ) : (
@@ -466,10 +487,12 @@ function App() {
                       <article className="product-card" key={produto.id}>
                         <div className="product-photo">
                           <img
-                            src={getImagemProduto(produto.foto)}
+                           src={getImagemProduto(produto.foto, produto.id)}
                             alt={produto.nome}
                             onError={(event) => {
-                              event.currentTarget.src = "/assets/default-product.png";
+                              event.currentTarget.onerror = null;
+                              event.currentTarget.src =
+                                "/maricagsam/assets/gsam.jpeg";
                             }}
                           />
                         </div>
@@ -478,18 +501,20 @@ function App() {
                           <h3>{produto.nome}</h3>
                           <p>{produto.categoria}</p>
 
-                          {produto.descricao && <span>{produto.descricao}</span>}
-
-                          {produto.preco && (
-                            <strong>
-                              {typeof produto.preco === "number"
-                                ? Number(produto.preco).toLocaleString("pt-BR", {
-                                    style: "currency",
-                                    currency: "BRL",
-                                  })
-                                : produto.preco}
-                            </strong>
+                          {produto.descricao && (
+                            <span>{produto.descricao}</span>
                           )}
+
+                          <strong>
+                            {produto.preco != null &&
+                            String(produto.preco).trim() !== "" &&
+                            Number(produto.preco) > 0
+                              ? Number(produto.preco).toLocaleString("pt-BR", {
+                                  style: "currency",
+                                  currency: "BRL",
+                                })
+                              : "Consultar valor"}
+                          </strong>
 
                           {produto.telefone && (
                             <small>Contato: {produto.telefone}</small>
@@ -504,38 +529,35 @@ function App() {
           </div>
         </section>
 
-        {/* ========================================
-            ADICIONAR PRODUTO
-        ======================================== */}
-       <section id="adicionar-produto" className="section">
-       <div className="container">
-      <AdicionarProduto empreendedores={empreendedores} />
-       </div>
-       </section>
-       <section id="cadastro-empreendedor" className="section">
-       <div className="container">
-      <CadastroEmpreendedor onCadastroSucesso={carregarDados} />
-       </div>
-      </section>
+        {/* ADICIONAR PRODUTO */}
+        <section id="adicionar-produto" className="section">
+          <div className="container">
+            <AdicionarProduto empreendedores={empreendedores} />
+          </div>
+        </section>
 
-        {/* ========================================
-            CADASTRO
-        ======================================== */}
+        {/* CADASTRO DE EMPREENDEDOR */}
+        <section id="cadastro-empreendedor" className="section">
+          <div className="container">
+            <CadastroEmpreendedor onCadastroSucesso={carregarDados} />
+          </div>
+        </section>
+
+        {/* CADASTRO DE USUÁRIO */}
         <section id="cadastro" className="section">
           <div className="container">
             <CadastroUsuario />
           </div>
         </section>
 
-        {/* ========================================
-            LOGIN
-        ======================================== */}
+        {/* LOGIN */}
         <section id="login" className="section">
           <div className="container">
             {usuarioLogado ? (
               <div className="usuario-logado">
                 <strong>Olá, {usuarioLogado.nome}! 👋</strong>
                 <p>Você está conectada ao GSAM Maricá.</p>
+
                 <button
                   type="button"
                   className="secondary-button"
@@ -550,96 +572,96 @@ function App() {
           </div>
         </section>
 
-        {/* ========================================
-            PROJETOS
-        ======================================== */}
+        {/* PROJETOS */}
         <section id="projetos" className="section">
           <div className="container">
             <span className="section-tag">NOSSOS PROJETOS</span>
+
             <h2>Iniciativas que aproximam pessoas</h2>
+
             <div className="projects-grid">
               <article className="project-card">
                 <h3>Sementinhas da Inclusão</h3>
                 <p>Ações de inclusão e integração comunitária.</p>
               </article>
+
               <article className="project-card">
                 <h3>Sabores sem Fronteiras</h3>
                 <p>Gastronomia, cultura e empreendedorismo.</p>
               </article>
+
               <article className="project-card">
                 <h3>Orientação ao Migrante</h3>
                 <p>Informação e apoio para a comunidade migrante.</p>
               </article>
+
               <article className="project-card">
                 <h3>Cultura e Diversidade</h3>
                 <p>Valorização das diferentes culturas.</p>
               </article>
+
               <article className="project-card">
-                 <h3>Ludoteca Poliglota</h3>
-                 <p>Atividades lúdicas e educativas para aproximar crianças e famílias de diferentes culturas e idiomas.
+                <h3>Ludoteca Poliglota</h3>
+                <p>
+                  Atividades lúdicas e educativas para aproximar crianças e
+                  famílias de diferentes culturas e idiomas.
                 </p>
               </article>
-              
             </div>
           </div>
         </section>
 
-        {/* ========================================
-            CONTATO
-        ======================================== */}
+        {/* CONTATO */}
         <section id="contato" className="section section-light">
-       <div className="container">
-       <span className="section-tag">CONTATO</span>
+          <div className="container">
+            <span className="section-tag">CONTATO</span>
 
-       <h2>Fale com o GSAM Maricá</h2>
+            <h2>Fale com o GSAM Maricá</h2>
 
-      <p className="section-description">
-      Entre em contato para conhecer melhor o trabalho do GSAM Maricá,
-      tirar dúvidas ou saber mais sobre nossas iniciativas.
-      </p>
+            <p className="section-description">
+              Entre em contato para conhecer melhor o trabalho do GSAM Maricá,
+              tirar dúvidas ou saber mais sobre nossas iniciativas.
+            </p>
 
-     {contatoAberto && (
-     <div className="contato-info">
-     <div className="contato-card">
-      <span className="contato-icon">📞</span>
-      <h3>Telefone</h3>
-      <a href="tel:+5521996171684">
-        +55 21 99617-1684
-      </a>
-    </div>
+            {contatoAberto && (
+              <div className="contato-info">
+                <div className="contato-card">
+                  <span className="contato-icon">📞</span>
+                  <h3>Telefone</h3>
+                  <a href="tel:+5521996171684">+55 21 99617-1684</a>
+                </div>
 
-    <div className="contato-card">
-      <span className="contato-icon">📱</span>
-      <h3>Instagram</h3>
-      <a
-        href="https://www.instagram.com/migracaomarica/"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        @migracaomarica
-      </a>
-    </div>
-  </div>
-)}
-    </div>
-      
-     </section>
-       
-       <button
-       type="button"
-       className="botao-contato"
-       onClick={() => setContatoAberto(!contatoAberto)}
-      > {contatoAberto ? "Fechar contato" : "Ver contatos"}
-      </button>
+                <div className="contato-card">
+                  <span className="contato-icon">📱</span>
+                  <h3>Instagram</h3>
+                  <a
+                    href="https://www.instagram.com/migracaomarica/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    @migracaomarica
+                  </a>
+                </div>
+              </div>
+            )}
 
-        </main>
+            <button
+              type="button"
+              className="botao-contato"
+              onClick={() => setContatoAberto(!contatoAberto)}
+            >
+              {contatoAberto ? "Fechar contato" : "Ver contatos"}
+            </button>
+          </div>
+        </section>
+      </main>
 
-        {/* ========================================
-          FOOTER
-        ======================================== */}
+      {/* FOOTER */}
       <footer className="footer">
         <div className="container">
-          <p>© 2026 GSAM Maricá • Acolher • Integrar • Conectar • Empreender</p>
+          <p>
+            © 2026 GSAM Maricá • Acolher • Integrar • Conectar • Empreender
+          </p>
         </div>
       </footer>
     </div>
