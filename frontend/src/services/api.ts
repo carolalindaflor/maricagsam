@@ -1,4 +1,4 @@
-const API_URL = "https://gsam-api.onrender.com";
+const API_URL = "https://gsam-api-web.onrender.com";
 
 export interface Empreendedor {
   id: number;
