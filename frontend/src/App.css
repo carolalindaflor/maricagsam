@@ -417,7 +417,7 @@ a {
 
 .card-photo {
   width: 100%;
-  height: 180px;
+  height: 140px;
   margin-bottom: 20px;
   overflow: hidden;
   border-radius: 18px;
@@ -522,45 +522,12 @@ a {
   background: var(--orange-dark);
   transform: translateY(-2px);
 }
-
-.contato-info {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  margin-top: 30px;
-}
-
-.contato-card {
-  padding: 25px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.contato-card h3 {
-  margin: 8px 0;
-  color: var(--white);
-}
-
-.contato-card a {
-  color: var(--orange);
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.contato-card a:hover {
-  text-decoration: underline;
-}
-
 @media (max-width: 600px) {
-  .contato-info {
-    grid-template-columns: 1fr;
-  }
-
   .botao-contato {
     width: 100%;
   }
 }
+
 
 .contato-info {
   display: grid;
@@ -879,10 +846,11 @@ a {
 
 .products-grid {
   width: 100%;
-  margin-top: 30px;
+  margin-top: 24px;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
+  align-items: stretch;
+  gap: 20px;
 }
 
 .product-card {
@@ -907,9 +875,10 @@ a {
 
 .product-photo {
   width: 100%;
-  height: 230px;
+  height: 150px;
   overflow: hidden;
   background: var(--orange-light);
+  flex-shrink: 0;
 }
 
 .product-photo img {
@@ -925,7 +894,10 @@ a {
 }
 
 .product-content {
-  padding: 24px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .product-content h3 {
@@ -1205,7 +1177,6 @@ a {
 }
 
 @media (max-width: 760px) {
-
   .login-container {
     padding: 25px;
   }
@@ -1222,11 +1193,6 @@ a {
 
   .sobre-card {
     padding: 24px;
-  }
-
-
-  .login-container h2 {
-    font-size: 1.6rem;
   }
 }
 /* ========================================
